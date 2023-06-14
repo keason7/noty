@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 def get_timestamp():
     dt = datetime.datetime.now()
-    ts = dt.strftime('%Y_%m_%d-%H_%M_%S')
+    ts = dt.strftime('%Y_%m_%d-%H_%M_%S_%f')
 
     return ts
 

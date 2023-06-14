@@ -9,7 +9,7 @@ def main():
 
     # noty.create_note('a')
     # noty.list_notes()
-    # noty.delete_note(5)
+    # noty.delete_note(2)
     # noty.launch_note(4)
 
 

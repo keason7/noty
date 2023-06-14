@@ -63,7 +63,7 @@ class JSONHandler(AbstractHandler):
             json.dump(metas, f, indent=4)
 
         # update settings
-        self.update_setting_file(optional_metas['subject'])
+        self.append_setting_file(optional_metas['subject'])
 
     def check_setting_file(self):
         '''
@@ -81,9 +81,9 @@ class JSONHandler(AbstractHandler):
             with open(str(file_path), "w") as f:
                 json.dump(metas, f, indent=4)
 
-    def update_setting_file(self, subject):
+    def append_setting_file(self, subject):
         '''
-        Update setting file after a not creation
+        Append setting file attribut after a note creation
         '''
         file_path = self.inner_paths['utils'] / str(self.setting_file + self.ext)
 
@@ -93,6 +93,21 @@ class JSONHandler(AbstractHandler):
         # update
         metas['max_idx'] += 1
         metas['subjects'].append(subject)
+
+        with open(str(file_path), "w") as f:
+            json.dump(metas, f, indent=4)
+
+    def remove_setting_file(self, subject):
+        '''
+        Remove setting file attribut after a note deletion
+        '''
+        file_path = self.inner_paths['utils'] / str(self.setting_file + self.ext)
+
+        with open(str(file_path), "r") as f:
+            metas = json.load(f)
+
+        # remove
+        metas['subjects'] = list(filter(lambda x: x != subject, metas['subjects']))
 
         with open(str(file_path), "w") as f:
             json.dump(metas, f, indent=4)

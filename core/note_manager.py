@@ -88,10 +88,17 @@ class NoteManager:
         '''
         Remove existing note
         '''
+        # get note paths
         note_paths = self.get_note(idx)
 
-        # REMOVE note[idx] subject from setting subjects
+        # load its metas
+        with open(str(note_paths['meta']), "r") as f:
+            note_metas = json.load(f)
 
+        # remove subject from settings
+        self.json_io.remove_setting_file(note_metas['subject'])
+
+        # remove note
         os.remove(note_paths['meta'])
         os.remove(note_paths['note'])
 
