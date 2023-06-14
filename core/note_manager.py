@@ -5,78 +5,99 @@ import subprocess
 from pathlib import Path
 
 from .utils import get_timestamp
+from .io import TXTHandler, JSONHandler
 
 
 class NoteManager:
     def __init__(self, root_path, text_editor):
+        '''
+        Initialize
+        '''
         self.root_path = Path(root_path)
         self.text_editor = text_editor
 
         self.inner_paths = {
             'metas': self.root_path / 'metas',
-            'notes': self.root_path / 'notes'
+            'notes': self.root_path / 'notes',
+            'utils': self.root_path / 'utils'
         }
 
+        # check and instanciate if needed necessary dirs
         self.verify_dir_tree()
 
+        # handlers
+        self.json_io = JSONHandler(self.inner_paths)
+        self.text_io = TXTHandler(self.inner_paths)
+
     def verify_dir_tree(self):
+        '''
+        Check or create main dirs
+        '''
         for key in self.inner_paths:
             Path(self.inner_paths[key]).mkdir(parents=True, exist_ok=True)
 
-    def create_json(self, file_name, subject):
-        file_path = self.inner_paths['metas'] / str(file_name + '.json')
+    def verify_subject(self, subject):
+        '''
+        Check if subject is already within an existing note
+        '''
+        file_path = self.inner_paths['utils'] / str(self.json_io.setting_file + self.json_io.ext)
 
-        idx = len(list(self.inner_paths['metas'].glob('*')))
+        with open(str(file_path), "r") as f:
+            metas = json.load(f)
 
-        metas = {
-            'id': idx,
-            'date': file_name,
-            'subject': subject,
-            'path_note': str(self.inner_paths['notes'] / str(file_name + '.txt'))
-        }
-
-        with file_path.open('w') as f:
-            json.dump(metas, f, indent=4)
-        f.close()
-
-    def create_txt(self, file_name):
-        file_path = self.inner_paths['notes'] / str(file_name + '.txt')
-
-        with file_path.open("w", encoding="utf-8") as f:
-            f.write('')
-        f.close()
+        if subject in metas['subjects']:
+            raise Exception('subject is not available')
 
     def create_note(self, subject):
-        self.verify_dir_tree()
+        '''
+        Create a note with meta file
+        '''
 
+        # check dirs
+        self.verify_dir_tree()
+        self.verify_subject(subject)
+
+        # now
         file_name = get_timestamp()
 
-        self.create_txt(file_name)
-        self.create_json(file_name, subject)
+        # create note
+        self.text_io.create(file_name, None)
+        self.json_io.create(file_name, {'subject': subject})
 
     def list_notes(self):
-        files = list(self.inner_paths['metas'].glob('**/*.json'))
-
-        for item in files:
-            print(item.stem)
+        pass
 
     def get_note(self, idx):
-        ptr = None
+        '''
+        Get note / meta paths from an existing note
+        '''
+
+        # jsons
         files = list(self.inner_paths['metas'].glob('**/*.json'))
 
-        for i, item in enumerate(files):
+        for _, item in enumerate(files):
             metas = json.load(open(str(item)))
 
+            # found note
             if metas['id'] == idx:
                 return {'note': metas['path_note'], 'meta': str(item)}
 
         raise Exception('Note does not exist')
 
     def delete_note(self, idx):
+        '''
+        Remove existing note
+        '''
         note_paths = self.get_note(idx)
+
+        # REMOVE note[idx] subject from setting subjects
+
         os.remove(note_paths['meta'])
         os.remove(note_paths['note'])
 
     def launch_note(self, idx):
+        '''
+        Launch existing note in text editor
+        '''
         note_paths = self.get_note(idx)
         subprocess.run([self.text_editor, f"{note_paths['note']}"])
