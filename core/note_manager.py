@@ -1,4 +1,6 @@
+import os
 import json
+import subprocess
 
 from pathlib import Path
 
@@ -29,7 +31,8 @@ class NoteManager:
         metas = {
             'id': idx,
             'date': file_name,
-            'subject': subject
+            'subject': subject,
+            'path_note': str(self.inner_paths['notes'] / str(file_name + '.txt'))
         }
 
         with file_path.open('w') as f:
@@ -56,3 +59,24 @@ class NoteManager:
 
         for item in files:
             print(item.stem)
+
+    def get_note(self, idx):
+        ptr = None
+        files = list(self.inner_paths['metas'].glob('**/*.json'))
+
+        for i, item in enumerate(files):
+            metas = json.load(open(str(item)))
+
+            if metas['id'] == idx:
+                return {'note': metas['path_note'], 'meta': str(item)}
+
+        raise Exception('Note does not exist')
+
+    def delete_note(self, idx):
+        note_paths = self.get_note(idx)
+        os.remove(note_paths['meta'])
+        os.remove(note_paths['note'])
+
+    def launch_note(self, idx):
+        note_paths = self.get_note(idx)
+        subprocess.run([self.text_editor, f"{note_paths['note']}"])

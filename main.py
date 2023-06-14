@@ -7,9 +7,10 @@ def main():
 
     noty = NoteManager(env['root_path'], env['text_editor'])
 
-    noty.create_note('a')
-
-    noty.list_notes()
+    # noty.create_note('a')
+    # noty.list_notes()
+    # noty.delete_note(5)
+    # noty.launch_note(4)
 
 
 if __name__ == "__main__":
