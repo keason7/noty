@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 from .utils import get_timestamp
-from .io import TXTHandler, JSONHandler
+from .io import TXTHandler, JSONHandler, SettingsHandler
 
 
 class NoteManager:
@@ -24,6 +24,9 @@ class NoteManager:
 
         # check and instanciate if needed necessary dirs
         self.verify_dir_tree()
+        self.settings_io = SettingsHandler(self.inner_paths['utils'])
+
+        self.inner_paths['settings'] = self.settings_io.location
 
         # handlers
         self.json_io = JSONHandler(self.inner_paths)
@@ -34,15 +37,15 @@ class NoteManager:
         Check or create main dirs
         '''
         for key in self.inner_paths:
-            Path(self.inner_paths[key]).mkdir(parents=True, exist_ok=True)
+            if not self.inner_paths[key].exists():
+                Path(self.inner_paths[key]).mkdir(parents=True, exist_ok=True)
 
     def verify_subject(self, subject):
         '''
         Check if subject is already within an existing note
         '''
-        file_path = self.inner_paths['utils'] / str(self.json_io.setting_file + self.json_io.ext)
 
-        with open(str(file_path), "r") as f:
+        with open(str(self.settings_io.location), "r") as f:
             metas = json.load(f)
 
         if subject in metas['subjects']:
@@ -63,6 +66,7 @@ class NoteManager:
         # create note
         self.text_io.create(file_name, None)
         self.json_io.create(file_name, {'subject': subject})
+        self.settings_io.incr({'subject': subject})
 
     def list_notes(self):
         pass
@@ -88,6 +92,8 @@ class NoteManager:
         '''
         Remove existing note
         '''
+        self.verify_dir_tree()
+
         # get note paths
         note_paths = self.get_note(idx)
 
@@ -96,7 +102,7 @@ class NoteManager:
             note_metas = json.load(f)
 
         # remove subject from settings
-        self.json_io.remove_setting_file(note_metas['subject'])
+        self.settings_io.decr({'subject': note_metas['subject']})
 
         # remove note
         os.remove(note_paths['meta'])

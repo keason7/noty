@@ -8,13 +8,12 @@ class AbstractHandler:
     Abstract input / output file handler
     '''
 
-    def __init__(self, inner_paths, ext, setting_file='global'):
+    def __init__(self, inner_paths, ext):
         '''
         Initialize
         '''
         self.inner_paths = inner_paths
         self.ext = ext
-        self.setting_file = setting_file
 
     @abstractmethod
     def create(self, file_name, optional_metas):
@@ -22,6 +21,54 @@ class AbstractHandler:
         Create method that needs to be implmented in subclass
         '''
         raise NotImplementedError('method is not implemented in base class')
+
+
+class SettingsHandler():
+    '''
+    JSON input / output file handler
+    '''
+
+    def __init__(self, settings_path, ext='.json'):
+        '''
+        Initialize
+        '''
+
+        self.location = settings_path / f'settings{ext}'
+
+        if not self.location.exists():
+            metas = {
+                'max_idx': -1,
+                'subjects': []
+            }
+
+            # write
+            with open(str(self.location), "w") as f:
+                json.dump(metas, f, indent=4)
+
+    def incr(self, updt_dict):
+        '''
+        '''
+        with open(str(self.location), "r") as f:
+            metas = json.load(f)
+
+        # update
+        metas['max_idx'] += 1
+        metas['subjects'].append(updt_dict['subject'])
+
+        with open(str(self.location), "w") as f:
+            json.dump(metas, f, indent=4)
+
+    def decr(self, updt_dict):
+        '''
+        '''
+        with open(str(self.location), "r") as f:
+            metas = json.load(f)
+
+        # update
+        metas['subjects'].remove(updt_dict['subject'])
+
+        with open(str(self.location), "w") as f:
+            json.dump(metas, f, indent=4)
 
 
 class JSONHandler(AbstractHandler):
@@ -35,8 +82,6 @@ class JSONHandler(AbstractHandler):
         '''
         super().__init__(inner_paths, ext)
 
-        self.check_setting_file()
-
     def create(self, file_name, optional_metas):
         '''
         Create json metadata file in metas path
@@ -44,10 +89,9 @@ class JSONHandler(AbstractHandler):
 
         # full file path
         file_path = self.inner_paths['metas'] / str(file_name + self.ext)
-        setting_path = self.inner_paths['utils'] / str(self.setting_file + self.ext)
 
         # open settings
-        with open(str(setting_path), "r") as f:
+        with open(str(self.inner_paths['settings']), "r") as f:
             meta = json.load(f)
 
         # construct metadatas
@@ -60,56 +104,6 @@ class JSONHandler(AbstractHandler):
 
         # write
         with file_path.open('w') as f:
-            json.dump(metas, f, indent=4)
-
-        # update settings
-        self.append_setting_file(optional_metas['subject'])
-
-    def check_setting_file(self):
-        '''
-        Check setting file existance and eventually create it
-        '''
-        file_path = self.inner_paths['utils'] / str(self.setting_file + self.ext)
-
-        if not file_path.exists():
-            metas = {
-                'max_idx': -1,
-                'subjects': []
-            }
-
-            # write
-            with open(str(file_path), "w") as f:
-                json.dump(metas, f, indent=4)
-
-    def append_setting_file(self, subject):
-        '''
-        Append setting file attribut after a note creation
-        '''
-        file_path = self.inner_paths['utils'] / str(self.setting_file + self.ext)
-
-        with open(str(file_path), "r") as f:
-            metas = json.load(f)
-
-        # update
-        metas['max_idx'] += 1
-        metas['subjects'].append(subject)
-
-        with open(str(file_path), "w") as f:
-            json.dump(metas, f, indent=4)
-
-    def remove_setting_file(self, subject):
-        '''
-        Remove setting file attribut after a note deletion
-        '''
-        file_path = self.inner_paths['utils'] / str(self.setting_file + self.ext)
-
-        with open(str(file_path), "r") as f:
-            metas = json.load(f)
-
-        # remove
-        metas['subjects'] = list(filter(lambda x: x != subject, metas['subjects']))
-
-        with open(str(file_path), "w") as f:
             json.dump(metas, f, indent=4)
 
 
