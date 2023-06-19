@@ -47,6 +47,7 @@ class SettingsHandler():
 
     def incr(self, updt_dict):
         '''
+        Settings metadata incr during note creation
         '''
         with open(str(self.location), "r") as f:
             metas = json.load(f)
@@ -58,8 +59,11 @@ class SettingsHandler():
         with open(str(self.location), "w") as f:
             json.dump(metas, f, indent=4)
 
+        return metas['max_idx']
+
     def decr(self, updt_dict):
         '''
+        Settings metadata decr during note deletion
         '''
         with open(str(self.location), "r") as f:
             metas = json.load(f)

@@ -66,10 +66,21 @@ class NoteManager:
         # create note
         self.text_io.create(file_name, None)
         self.json_io.create(file_name, {'subject': subject})
-        self.settings_io.incr({'subject': subject})
+        idx = self.settings_io.incr({'subject': subject})
+        return idx
 
     def list_notes(self):
-        pass
+        '''
+        List notes
+        '''
+        files = list(self.inner_paths['metas'].glob('**/*.json'))
+
+        for item in files:
+            metas = json.load(open(str(item)))
+            print(f"id: {metas['id']}, sub: {metas['subject']}")
+
+    def search_content(self, content):
+        raise NotImplementedError('function is not implemented yet')
 
     def get_note(self, idx):
         '''
