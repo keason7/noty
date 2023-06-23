@@ -19,7 +19,7 @@ mv .template_env .env
 ### Edit preferences
 ```
 root_path = path to dir where noty is installed  
-text_editor = favorite text editor such as gedit (keyword=**gedit**), sublime-text (keyword=**subl**)
+text_editor = favorite text editor such as gedit (keyword=gedit), sublime-text (keyword=subl)
 ```
 
 ### Install conda env and create aliases
@@ -45,4 +45,32 @@ alias <alias_name>="conda run -n noty python /path/to/cloned_repository/main.py 
 Aliases can be found in install/alias.yml such as:
 ```
 <alias_name>: <alias_value>
+```
+
+## Usage
+Aliases enable to launch commands from anywhere within a specific env
+
+### Create a note and launch it
+```
+noty_create <subject>
+```
+
+### Delete a note
+```
+noty_delete <id>
+```
+
+### Launch a note
+```
+noty_launch <id>
+```
+
+### List all notes
+```
+noty_list
+```
+
+### Search for a keywork in notes
+```
+noty_search <pattern>
 ```
