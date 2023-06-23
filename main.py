@@ -1,49 +1,49 @@
 import sys
 import argparse
 
-from noty.utils import get_env_var
-from noty.note_manager import NoteManager
+from noty.noty import Noty
+from noty.utils import get_env_var, parse_state, check_args
 
 
-def parse_state(arg):
-    return arg is not None
+def main(args):
+    # get env params
+    env = get_env_var()
 
+    app = Noty(
+        env['root_path'],
+        env['text_editor']
+    )
 
-def check_args(args):
-    args = args._get_kwargs()
-    values = [arg[1] for arg in args]
+    # check n_args
+    check_args(parser, args)
 
-    if not any(values) and 0 not in values:
-        parser.parse_args(["-h"])
+    # create and launch
+    if parse_state(args.create):
+        app.create(args.create)
+        sys.exit()
 
-    n_args = len(list(set(values))) - 1
+    # delete
+    if parse_state(args.delete):
+        app.delete(args.delete)
+        sys.exit()
 
-    if n_args > 1:
-        raise Exception(f'max n_arg = 1, but found {n_args}')
+    # launch
+    if parse_state(args.launch):
+        app.delete(args.launch)
+        sys.exit()
 
+    # list
+    if parse_state(args.list):
+        app.list()
+        sys.exit()
 
-class Launcher():
-    def __init__(self):
-        env = get_env_var()
-        self.noty = NoteManager(env['root_path'], env['text_editor'])
-
-    def create(self, subject):
-        idx = self.noty.create_note(subject)
-        self.noty.launch_note(idx)
-
-    def delete(self, idx):
-        self.noty.delete_note(idx)
-
-    def launch(self, idx):
-        self.noty.launch_note(idx)
-
-    def list(self):
-        self.noty.list_notes()
+    # search
+    if parse_state(args.search):
+        app.search(args.search)
+        sys.exit()
 
 
 if __name__ == "__main__":
-
-    app = Launcher()
 
     parser = argparse.ArgumentParser()
 
@@ -84,24 +84,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    check_args(args)
-
-    if parse_state(args.create):
-        app.create(args.create)
-        sys.exit()
-
-    if parse_state(args.delete):
-        app.delete(args.delete)
-        sys.exit()
-
-    if parse_state(args.launch):
-        app.delete(args.launch)
-        sys.exit()
-
-    if parse_state(args.list):
-        app.list()
-        sys.exit()
-
-    if parse_state(args.search):
-        app.search(args.search)
-        sys.exit()
+    main(args)

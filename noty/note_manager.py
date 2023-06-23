@@ -79,8 +79,48 @@ class NoteManager:
             metas = json.load(open(str(item)))
             print(f"id: {metas['id']}, sub: {metas['subject']}")
 
-    def search_content(self, content):
-        raise NotImplementedError('function is not implemented yet')
+    def search_content(self, content, n_extra_line=1, max_res_per_file=1):
+        '''
+        Search content within all notes
+        '''
+
+        # meta files
+        files = list(self.inner_paths['metas'].glob('**/*.json'))
+
+        for item in files:
+            # open metas
+            metas = json.load(open(str(item)))
+
+            # -A : display n lines before pattern
+            # -B : display n lines after pattern
+            # -m : max occurence per file
+            # -n : show file line number
+            # --color : display patter as colored
+            cmd = [
+                'grep',
+                f'-A {n_extra_line}',
+                f'-B {n_extra_line}',
+                f'-m {max_res_per_file}',
+                '-n',
+                '--color=always',
+                content,
+                metas['path_note']
+            ]
+
+            # run cmd
+            out = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True
+            )
+
+            # str result
+            search_result = out.stdout
+
+            # is there pattern
+            if search_result != '':
+                print(f"note id: {metas['id']}, subject: {metas['subject']}")
+                print(f'{search_result}\n')
 
     def get_note(self, idx):
         '''
