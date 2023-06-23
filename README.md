@@ -1,7 +1,7 @@
 # noty
 
 ## Overview
-
+Simple CLI note taker and note management 
 
 ## Install
 
