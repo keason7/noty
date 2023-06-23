@@ -1,5 +1,6 @@
 import os
 import datetime
+import yaml
 
 from dotenv import load_dotenv
 
@@ -54,3 +55,16 @@ def get_env_var():
     text_editor = os.getenv('text_editor')
 
     return {'root_path': root_path, 'text_editor': text_editor}
+
+
+def load_yml(path, shell=False):
+    '''
+    Read yml file as dict
+    '''
+    with open(path, 'r') as file:
+        content = yaml.safe_load(file)
+
+    if shell:
+        exit(content)
+
+    return content
