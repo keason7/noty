@@ -5,19 +5,20 @@
 
 ## Install
 
-Clone the project
+### Clone the project
 ```
 git clone [repo_url]
 cd noty
 ```
 
-Rename .env file
+### Rename .env file
 ```
 mv .template_env .env
 ```
 
-root_path = path to dir where noty is installed
-text_editor = favorite text editor such as gedit, subl
+### Edit preferences
+root_path = path to dir where noty is installed  
+text_editor = favorite text editor such as gedit (keyword=**gedit**), sublime-text (keyword=**subl**)
 
 ```
 root_path=/path/to/install_dir
