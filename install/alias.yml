@@ -1,0 +1,5 @@
+noty_launch: --launch
+noty_create: --create
+noty_delete: --delete
+noty_list: --list
+noty_search: --search
