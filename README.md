@@ -31,6 +31,7 @@ bash install/install.sh
 This will create a conda env named 'noty'. Then commands aliases are edited in ~/.bashrc  
 
 - Method 2  
+
 Create the env
 ```
 conda env create -f install/env.yml
