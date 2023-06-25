@@ -19,7 +19,8 @@ class NoteManager:
         self.inner_paths = {
             'metas': self.root_path / 'metas',
             'notes': self.root_path / 'notes',
-            'utils': self.root_path / 'utils'
+            'utils': self.root_path / 'utils',
+            'backup': self.root_path / 'backup'
         }
 
         # check and instanciate if needed necessary dirs
@@ -31,6 +32,27 @@ class NoteManager:
         # handlers
         self.json_io = JSONHandler(self.inner_paths)
         self.text_io = TXTHandler(self.inner_paths)
+
+        self.exec_backup()
+
+    def exec_backup(self, keys=['metas', 'notes', 'utils']):
+        '''
+        Apply rsync
+        '''
+        for key in keys:
+            cmd = [
+                'rsync',
+                '-avz',
+                self.inner_paths[key],
+                self.inner_paths['backup']
+            ]
+
+            # run cmd
+            _ = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True
+            )
 
     def verify_dir_tree(self):
         '''
@@ -77,7 +99,7 @@ class NoteManager:
 
         for item in files:
             metas = json.load(open(str(item)))
-            print(f"id: {metas['id']}, sub: {metas['subject']}")
+            print(f"note id: {metas['id']}, subject: {metas['subject']}")
 
     def search_content(self, content, n_extra_line=1, max_res_per_file=1):
         '''
