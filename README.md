@@ -53,25 +53,25 @@ Aliases enable to launch commands from anywhere within a specific env
 
 ### Create a note and launch it
 ```
-noty_create <subject>
+ncreate <subject>
 ```
 
 ### Delete a note
 ```
-noty_delete <id>
+ndelete <id>
 ```
 
 ### Launch a note
 ```
-noty_launch <id>
+nlaunch <id>
 ```
 
 ### List all notes
 ```
-noty_list
+nlist
 ```
 
 ### Search for a keywork in notes
 ```
-noty_search <pattern>
+nsearch <pattern>
 ```
