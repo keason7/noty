@@ -3,7 +3,7 @@
 ## Overview
 Simple CLI note taker and note management 
 
-## Install
+## :wrench: Install
 
 ### Clone the project
 ```
@@ -48,7 +48,7 @@ Aliases can be found in install/alias.yml such as:
 <alias_name>: <alias_value>
 ```
 
-## Usage
+## :rocket: Usage
 Aliases enable to launch commands from anywhere within a specific env
 
 ### Create a note and launch it
