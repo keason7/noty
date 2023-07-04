@@ -1,4 +1,4 @@
-# noty
+# :green_book noty
 
 ## Overview
 Simple CLI note taker and note management 
