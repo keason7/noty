@@ -29,7 +29,7 @@ def main(args):
 
     # launch
     if parse_state(args.launch):
-        app.delete(args.launch)
+        app.launch(args.launch)
         sys.exit()
 
     # list
