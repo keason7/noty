@@ -1,20 +1,22 @@
-import sys
+"""Noty entry script."""
+
 import argparse
+import sys
 
 from noty.noty import Noty
-from noty.utils import get_env_var, parse_state, check_args
+from noty.utils import check_args, get_env_var, parse_state
 
 
-def main(args):
-    # get env params
+def run(parser, args):
+    """Run noty command.
+
+    Args:
+        parser (argparse.ArgumentParser): Argparse parser.
+        args (argparse.Namespace): Argparse arguments.
+    """
     env = get_env_var()
+    app = Noty(env["root_path"], env["text_editor"])
 
-    app = Noty(
-        env['root_path'],
-        env['text_editor']
-    )
-
-    # check n_args
     check_args(parser, args)
 
     # create and launch
@@ -44,44 +46,13 @@ def main(args):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run noty app.")
 
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        '--create',
-        type=str,
-        default=None,
-        help='create a note'
-    )
-
-    parser.add_argument(
-        '--delete',
-        type=int,
-        default=None,
-        help='delete a note'
-    )
-
-    parser.add_argument(
-        '--launch',
-        type=int,
-        default=None,
-        help='launch a note'
-    )
-
-    parser.add_argument(
-        '--list',
-        default=None,
-        action='store_true',
-        help='list notes'
-    )
-
-    parser.add_argument(
-        '--search',
-        type=str,
-        default=None,
-        help='search a note content'
-    )
+    parser.add_argument("--create", type=str, default=None, help="Create a note.")
+    parser.add_argument("--delete", type=int, default=None, help="Delete a note.")
+    parser.add_argument("--launch", type=int, default=None, help="Launch a note.")
+    parser.add_argument("--list", default=None, action="store_true", help="List notes.")
+    parser.add_argument("--search", type=str, default=None, help="Search a note content.")
 
     args = parser.parse_args()
-
-    main(args)
+    run(parser, args)
