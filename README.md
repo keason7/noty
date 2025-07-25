@@ -41,7 +41,7 @@ This will create a conda env named 'noty'. Then commands aliases are edited in ~
 Create the env
 
 ```bash
-conda env create -f install/env.yml
+conda env create -f install/environment.yml
 conda activate noty
 ```
 
