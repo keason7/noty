@@ -1,24 +1,56 @@
-import os
-import datetime
-import yaml
+"""Utils functions module."""
 
+import datetime
+import os
+
+import yaml
 from dotenv import load_dotenv
 
 
+def read_yml(path, shell=False):
+    """Read YAML file. If `shell=True`, the parsed content is printed to the console using
+    `exit(content)` and the program exits immediately.
+
+    Args:
+        path (str): YAML file path.
+        shell (bool, optional): If True, print and exit with the parsed YAML content. Defaults to False.
+
+    Returns:
+        dict: Parsed YAML content as a dictionary.
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        content = yaml.safe_load(f)
+
+    if shell:
+        exit(content)
+
+    return content
+
+
 def parse_state(arg):
-    '''
-    Return True is arg is not None, else False
-    '''
+    """Check argument type to know if its None or another type.
+
+    Args:
+        arg (int | str | bool | None): Input argument.
+
+    Returns:
+        bool: Return True is arg is not None, else False
+    """
     return arg is not None
 
 
 def check_args(parser, args):
-    '''
-    Check how many args are passed
-    '''
+    """Check how many arguments are passed.
+
+    Args:
+        parser (argparse.ArgumentParser): Argparse parser.
+        args (argparse.Namespace): Argparse arguments.
+
+    Raises:
+        ValueError: Maximum number of arguments=1.
+    """
     # get args value(s)
-    args = args._get_kwargs()
-    values = [arg[1] for arg in args]
+    values = [arg[1] for arg in args._get_kwargs()]
 
     # all args args are None, show help
     if not any(values) and 0 not in values:
@@ -29,42 +61,31 @@ def check_args(parser, args):
     n_args = len(list(set(values))) - 1
 
     if n_args > 1:
-        raise Exception(f'max n_arg = 1, but found {n_args}')
+        raise ValueError(f"Maximum number of arguments=1, but found {n_args}")
 
 
 def get_timestamp():
-    '''
-    Return current timestamp
-    '''
-    dt = datetime.datetime.now()
-    ts = dt.strftime('%Y_%m_%d-%H_%M_%S_%f')
+    """Return current timestamp.
 
-    return ts
+    Returns:
+        str: Timestamp in YYYY_MM_DD-HH_MM_SS format.
+    """
+    now = datetime.datetime.now()
+    return now.strftime("%Y_%m_%d-%H_%M_%S_%f")
 
 
 def get_env_var():
-    '''
-    Load env var values as dict
-    '''
-    res = load_dotenv()
+    """Read .env file.
 
-    if not res:
-        raise Exception('.env file not found')
+    Raises:
+        FileNotFoundError: Missing .env file.
 
-    root_path = os.getenv('root_path')
-    text_editor = os.getenv('text_editor')
+    Returns:
+        dict: File content.
+    """
+    dotenv = load_dotenv()
 
-    return {'root_path': root_path, 'text_editor': text_editor}
+    if not dotenv:
+        raise FileNotFoundError("Missing .env file.")
 
-
-def load_yml(path, shell=False):
-    '''
-    Read yml file as dict
-    '''
-    with open(path, 'r') as file:
-        content = yaml.safe_load(file)
-
-    if shell:
-        exit(content)
-
-    return content
+    return {"root_path": os.getenv("root_path"), "text_editor": os.getenv("text_editor")}

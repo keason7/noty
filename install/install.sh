@@ -7,7 +7,7 @@ env_name=noty
 echo "Create environment"
 
 # create and activate env
-conda env create -f install/env.yml
+conda env create -f install/environment.yml
 source activate $env_name
 
 
@@ -20,7 +20,7 @@ path_alias=$path_root/install/alias.yml
 path_script=$path_root/main.py
 
 # get aliases as str(dict()) from yml file
-aliases=$(python -c "from noty.utils import load_yml; load_yml(\"$path_alias\", shell=True)" 2>&1)
+aliases=$(python -c "from noty.utils import read_yml; read_yml(\"$path_alias\", shell=True)" 2>&1)
 
 # remove the curly braces and single quotes from the string
 aliases=${aliases#*\{}

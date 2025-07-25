@@ -1,44 +1,53 @@
+"""Noty module."""
+
 from noty.note_manager import NoteManager
 
 
-class Noty():
-    '''
-    Note Manager wrapper
-    '''
+class Noty:
+    """Note Manager commands wrapper."""
 
     def __init__(self, root_path, text_editor):
-        '''
-        Init NoteManager object
-        '''
+        """Initialize Noty object.
+
+        Args:
+            root_path (str): Installation path.
+            text_editor (str): Prefered text editor.
+        """
         self.noty = NoteManager(root_path, text_editor)
 
     def create(self, subject):
-        '''
-        Create and launch
-        '''
+        """Create and launch a note.
+
+        Args:
+            subject (str): Subject of the note.
+        """
         idx = self.noty.create_note(subject)
         self.noty.launch_note(idx)
 
     def delete(self, idx):
-        '''
-        Delete a note
-        '''
+        """Delete a note.
+
+        Args:
+            idx (int): Note id.
+        """
         self.noty.delete_note(idx)
 
     def launch(self, idx):
-        '''
-        Launch note
-        '''
+        """Launch a note.
+
+        Args:
+            idx (int): Note id.
+        """
         self.noty.launch_note(idx)
 
     def list(self):
-        '''
-        List registered notes
-        '''
+        """List existing notes."""
         self.noty.list_notes()
 
     def search(self, content):
-        '''
-        Search content within all notes
-        '''
+        """Search content within all existing notes.
+
+        Args:
+            content (str): String to search.
+        """
         self.noty.search_content(content)

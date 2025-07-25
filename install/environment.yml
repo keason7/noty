@@ -1,0 +1,6 @@
+name: noty
+dependencies:
+  - anaconda::python==3.13.5
+  - anaconda::pip==25.1
+  - anaconda::python-dotenv==1.1.0
+  - anaconda::pyyaml==6.0.2
