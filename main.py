@@ -7,41 +7,39 @@ from noty.noty import Noty
 from noty.utils import check_args, get_env_var, parse_state
 
 
-def run(parser, args):
+def run(arguments):
     """Run noty command.
 
     Args:
         parser (argparse.ArgumentParser): Argparse parser.
-        args (argparse.Namespace): Argparse arguments.
+        arguments (argparse.Namespace): Argparse arguments.
     """
     env = get_env_var()
     app = Noty(env["root_path"], env["text_editor"])
 
-    check_args(parser, args)
-
     # create and launch
-    if parse_state(args.create):
-        app.create(args.create)
+    if parse_state(arguments.create):
+        app.create(arguments.create)
         sys.exit()
 
     # delete
-    if parse_state(args.delete):
-        app.delete(args.delete)
+    if parse_state(arguments.delete):
+        app.delete(arguments.delete)
         sys.exit()
 
     # launch
-    if parse_state(args.launch):
-        app.launch(args.launch)
+    if parse_state(arguments.launch):
+        app.launch(arguments.launch)
         sys.exit()
 
     # list
-    if parse_state(args.list):
+    if parse_state(arguments.list):
         app.list()
         sys.exit()
 
     # search
-    if parse_state(args.search):
-        app.search(args.search)
+    if parse_state(arguments.search):
+        app.search(arguments.search)
         sys.exit()
 
 
@@ -55,4 +53,6 @@ if __name__ == "__main__":
     parser.add_argument("--search", type=str, default=None, help="Search a note content.")
 
     args = parser.parse_args()
-    run(parser, args)
+
+    check_args(parser, args)
+    run(args)

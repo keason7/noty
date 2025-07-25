@@ -29,13 +29,12 @@ class NoteManager:
             "backup": self.root_path / "backup",
         }
 
-        # check and instanciate if needed necessary dirs
+        # check and instanciate if needed necessary install directories
         self.verify_dir_tree()
         self.settings_io = SettingsHandler(self.inner_paths["utils"])
 
         self.inner_paths["settings"] = self.settings_io.location
 
-        # handlers
         self.json_io = JSONHandler(self.inner_paths)
         self.text_io = TXTHandler(self.inner_paths)
 
@@ -48,7 +47,6 @@ class NoteManager:
             keys (list): List of keys to perform backup on.
         """
         for key in keys:
-            # run cmd
             subprocess.run(["rsync", "-ac", self.inner_paths[key], self.inner_paths["backup"]], check=True)
 
     def verify_dir_tree(self):
@@ -81,16 +79,16 @@ class NoteManager:
         Returns:
             int: Note idx.
         """
-        # check dirs
+        # check and instanciate if needed necessary install directories
         self.verify_dir_tree()
+
+        # check subject validity
         self.verify_subject(subject)
 
-        # now
-        file_name = get_timestamp()
+        timestamp = get_timestamp()
+        self.text_io.create(timestamp, None)
+        self.json_io.create(timestamp, {"subject": subject})
 
-        # create note
-        self.text_io.create(file_name, None)
-        self.json_io.create(file_name, {"subject": subject})
         idx = self.settings_io.incr({"subject": subject})
         return idx
 
@@ -110,11 +108,9 @@ class NoteManager:
             n_extra_line (int, optional): Number of lines before pattern. Defaults to 1.
             max_res_per_file (int, optional): Max occurence per file. Defaults to 1.
         """
-        # meta files
         files = list(self.inner_paths["metas"].glob("**/*.json"))
 
         for item in files:
-            # open metas
             metas = json.load(open(str(item), "r", encoding="utf-8"))
 
             # -A : display n lines before pattern
@@ -132,11 +128,7 @@ class NoteManager:
                 content,
                 metas["path_note"],
             ]
-
-            # run cmd
             std = subprocess.run(grep, check=False, capture_output=True, text=True)
-
-            # str result
             search_result = std.stdout
 
             # is there pattern
@@ -156,13 +148,12 @@ class NoteManager:
         Returns:
             dict: Note and metadata dictionary.
         """
-        # jsons
         files = list(self.inner_paths["metas"].glob("**/*.json"))
 
         for _, item in enumerate(files):
             metas = json.load(open(str(item), "r", encoding="utf-8"))
 
-            # found note
+            # note has been found
             if metas["id"] == idx:
                 return {"note": metas["path_note"], "meta": str(item)}
 
@@ -175,12 +166,9 @@ class NoteManager:
             idx (int): Note index.
         """
         self.verify_dir_tree()
-
-        # get note paths
         note_paths = self.get_note(idx)
 
-        # load its metas
-        with open(str(note_paths["meta"]), "r") as f:
+        with open(str(note_paths["meta"]), "r", encoding="utf-8") as f:
             note_metas = json.load(f)
 
         # remove subject from settings

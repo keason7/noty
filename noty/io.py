@@ -34,7 +34,6 @@ class SettingsHandler:
         with open(str(self.location), "r", encoding="utf-8") as f:
             metas = json.load(f)
 
-        # update
         metas["max_idx"] += 1
         metas["subjects"].append(updt_dict["subject"])
 
@@ -52,7 +51,6 @@ class SettingsHandler:
         with open(str(self.location), "r", encoding="utf-8") as f:
             metas = json.load(f)
 
-        # update
         metas["subjects"].remove(updt_dict["subject"])
 
         with open(str(self.location), "w", encoding="utf-8") as f:
@@ -105,10 +103,8 @@ class JSONHandler(AbstractHandler):
             file_name (str): Filename to create.
             optional_metas (dict): Optional metadatas.
         """
-        # full file path
         file_path = self.inner_paths["metas"] / str(file_name + self.ext)
 
-        # open settings
         with open(str(self.inner_paths["settings"]), "r", encoding="utf-8") as f:
             meta = json.load(f)
 
@@ -120,7 +116,6 @@ class JSONHandler(AbstractHandler):
             "path_note": str(self.inner_paths["notes"] / str(file_name + ".txt")),
         }
 
-        # write
         with file_path.open("w", encoding="utf-8") as f:
             json.dump(metas, f, indent=4)
 
@@ -144,10 +139,8 @@ class TXTHandler(AbstractHandler):
             file_name (str): Filename to create.
             optional_metas (dict): Optional metadatas.
         """
-        # full file path
         file_path = self.inner_paths["notes"] / str(file_name + self.ext)
 
-        # write
         with file_path.open("w", encoding="utf-8") as f:
             f.write("")
         f.close()
