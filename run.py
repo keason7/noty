@@ -14,8 +14,8 @@ def run(arguments):
         parser (argparse.ArgumentParser): Argparse parser.
         arguments (argparse.Namespace): Argparse arguments.
     """
-    env = get_dot_env()
-    app = Noty(env["root_path"], env["text_editor"])
+    dot_env = get_dot_env()
+    app = Noty(dot_env["path_root"], dot_env["text_editor"])
 
     # create and launch
     if parse_state(arguments.create):

@@ -6,14 +6,14 @@ from noty.note_manager import NoteManager
 class Noty:
     """Note Manager commands wrapper."""
 
-    def __init__(self, root_path, text_editor):
+    def __init__(self, path_root, text_editor):
         """Initialize Noty object.
 
         Args:
-            root_path (str): Installation path.
+            path_root (str): Installation path.
             text_editor (str): Prefered text editor.
         """
-        self.noty = NoteManager(root_path, text_editor)
+        self.noty = NoteManager(path_root, text_editor)
 
     def create(self, subject):
         """Create and launch a note.

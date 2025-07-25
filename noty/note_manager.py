@@ -12,48 +12,33 @@ from noty.utils import get_timestamp
 class NoteManager:
     """Note Manager class."""
 
-    def __init__(self, root_path, text_editor):
+    def __init__(self, path_root, text_editor):
         """Initialize Note Manager object.
 
         Args:
-            root_path (str): Installation path.
+            path_root (str): Installation path.
             text_editor (str): Prefered text editor.
         """
-        self.root_path = Path(root_path)
+        self.path_install = Path(path_root) / ".noty"
+        self.path_install.mkdir(mode=0o777, parents=False, exist_ok=True)
         self.text_editor = text_editor
 
-        self.inner_paths = {
-            "metas": self.root_path / "metas",
-            "notes": self.root_path / "notes",
-            "utils": self.root_path / "utils",
-            "backup": self.root_path / "backup",
+        self.paths_inner = {
+            "metadatas": self.path_install / "metadatas",
+            "notes": self.path_install / "notes",
+            "utils": self.path_install / "utils",
         }
 
-        # check and instanciate if needed necessary install directories
-        self.verify_dir_tree()
-        self.settings_io = SettingsHandler(self.inner_paths["utils"])
-
-        self.inner_paths["settings"] = self.settings_io.location
-
-        self.json_io = JSONHandler(self.inner_paths)
-        self.text_io = TXTHandler(self.inner_paths)
-
-        self.exec_backup(keys=["metas", "notes", "utils"])
-
-    def exec_backup(self, keys):
-        """Perform notes backup.
-
-        Args:
-            keys (list): List of keys to perform backup on.
-        """
-        for key in keys:
-            subprocess.run(["rsync", "-ac", self.inner_paths[key], self.inner_paths["backup"]], check=True)
-
-    def verify_dir_tree(self):
-        """Verify that installation directories are created."""
-        for _, value in self.inner_paths.items():
+        for _, value in self.paths_inner.items():
             if not value.exists():
-                Path(value).mkdir(parents=True, exist_ok=True)
+                Path(value).mkdir(mode=0o777, parents=False, exist_ok=True)
+
+        self.settings_io = SettingsHandler(self.paths_inner["utils"])
+
+        self.paths_inner["settings"] = self.settings_io.location
+
+        self.json_io = JSONHandler(self.paths_inner)
+        self.text_io = TXTHandler(self.paths_inner)
 
     def verify_subject(self, subject):
         """Check that input subject is not in existing notes.
@@ -65,9 +50,9 @@ class NoteManager:
             KeyError: Subject is not available.
         """
         with open(str(self.settings_io.location), "r", encoding="utf-8") as f:
-            metas = json.load(f)
+            metadatas = json.load(f)
 
-        if subject in metas["subjects"]:
+        if subject in metadatas["subjects"]:
             raise KeyError("Subject is not available.")
 
     def create_note(self, subject):
@@ -79,8 +64,6 @@ class NoteManager:
         Returns:
             int: Note idx.
         """
-        # check and instanciate if needed necessary install directories
-        self.verify_dir_tree()
 
         # check subject validity
         self.verify_subject(subject)
@@ -94,11 +77,12 @@ class NoteManager:
 
     def list_notes(self):
         """List existing notes."""
-        files = list(self.inner_paths["metas"].glob("**/*.json"))
+        files = list(self.paths_inner["metadatas"].glob("**/*.json"))
 
         for item in files:
-            metas = json.load(open(str(item), "r", encoding="utf-8"))
-            print(f"note id: {metas['id']}, subject: {metas['subject']}")
+            with open(str(item), "r", encoding="utf-8") as f:
+                metadatas = json.load(f)
+            print(f"note id: {metadatas['id']}, subject: {metadatas['subject']}")
 
     def search_content(self, content, n_extra_line=1, max_res_per_file=1):
         """Search content within notes.
@@ -108,10 +92,11 @@ class NoteManager:
             n_extra_line (int, optional): Number of lines before pattern. Defaults to 1.
             max_res_per_file (int, optional): Max occurence per file. Defaults to 1.
         """
-        files = list(self.inner_paths["metas"].glob("**/*.json"))
+        files = list(self.paths_inner["metadatas"].glob("**/*.json"))
 
         for item in files:
-            metas = json.load(open(str(item), "r", encoding="utf-8"))
+            with open(str(item), "r", encoding="utf-8") as f:
+                metadatas = json.load(f)
 
             # -A : display n lines before pattern
             # -B : display n lines after pattern
@@ -126,14 +111,14 @@ class NoteManager:
                 "-n",
                 "--color=always",
                 content,
-                metas["path_note"],
+                metadatas["path_note"],
             ]
             std = subprocess.run(grep, check=False, capture_output=True, text=True)
             search_result = std.stdout
 
             # is there pattern
             if search_result != "":
-                print(f"note id: {metas['id']}, subject: {metas['subject']}")
+                print(f"note id: {metadatas['id']}, subject: {metadatas['subject']}")
                 print(f"{search_result}\n")
 
     def get_note(self, idx):
@@ -148,14 +133,15 @@ class NoteManager:
         Returns:
             dict: Note and metadata dictionary.
         """
-        files = list(self.inner_paths["metas"].glob("**/*.json"))
+        files = list(self.paths_inner["metadatas"].glob("**/*.json"))
 
         for _, item in enumerate(files):
-            metas = json.load(open(str(item), "r", encoding="utf-8"))
+            with open(str(item), "r", encoding="utf-8") as f:
+                metadatas = json.load(f)
 
             # note has been found
-            if metas["id"] == idx:
-                return {"note": metas["path_note"], "meta": str(item)}
+            if metadatas["id"] == idx:
+                return {"note": metadatas["path_note"], "meta": str(item)}
 
         raise FileNotFoundError("Note does not exist.")
 
@@ -165,18 +151,17 @@ class NoteManager:
         Args:
             idx (int): Note index.
         """
-        self.verify_dir_tree()
-        note_paths = self.get_note(idx)
+        paths_note = self.get_note(idx)
 
-        with open(str(note_paths["meta"]), "r", encoding="utf-8") as f:
+        with open(str(paths_note["meta"]), "r", encoding="utf-8") as f:
             note_metas = json.load(f)
 
         # remove subject from settings
         self.settings_io.decr({"subject": note_metas["subject"]})
 
         # remove note
-        os.remove(note_paths["meta"])
-        os.remove(note_paths["note"])
+        os.remove(paths_note["meta"])
+        os.remove(paths_note["note"])
 
     def launch_note(self, idx):
         """Launch existing note in prefered text editor.
@@ -184,5 +169,5 @@ class NoteManager:
         Args:
             idx (int): Note index.
         """
-        note_paths = self.get_note(idx)
-        subprocess.run([self.text_editor, f"{note_paths['note']}"], check=False)
+        paths_note = self.get_note(idx)
+        subprocess.run([self.text_editor, f"{paths_note['note']}"], check=False)

@@ -22,7 +22,7 @@ mv .template_env .env
 ### Edit preferences
 
 ```bash
-root_path = path to dir where noty is installed
+path_root = path to dir where noty is installed
 text_editor = favorite text editor such as gedit (keyword=gedit), sublime-text (keyword=subl)
 ```
 

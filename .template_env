@@ -1,2 +1,2 @@
-root_path=/path/to/install_dir
+path_root=/path/to/install/dir
 text_editor=gedit

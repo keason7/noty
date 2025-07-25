@@ -33,6 +33,23 @@ def check_arguments_validity(parser, args):
         raise ValueError(f"Maximum number of arguments=1, but found {n_args_not_none}")
 
 
+def get_dot_env():
+    """Read .env file.
+
+    Raises:
+        FileNotFoundError: Missing .env file.
+
+    Returns:
+        dict: File content.
+    """
+    dot_env = load_dotenv()
+
+    if not dot_env:
+        raise FileNotFoundError("Missing .env file.")
+
+    return {"path_root": os.getenv("path_root"), "text_editor": os.getenv("text_editor")}
+
+
 def read_yml(path, shell=False):
     """Read YAML file. If `shell=True`, the parsed content is printed to the console using
     `exit(content)` and the program exits immediately.
@@ -73,20 +90,3 @@ def get_timestamp():
     """
     now = datetime.datetime.now()
     return now.strftime("%Y_%m_%d-%H_%M_%S_%f")
-
-
-def get_dot_env():
-    """Read .env file.
-
-    Raises:
-        FileNotFoundError: Missing .env file.
-
-    Returns:
-        dict: File content.
-    """
-    dotenv = load_dotenv()
-
-    if not dotenv:
-        raise FileNotFoundError("Missing .env file.")
-
-    return {"root_path": os.getenv("root_path"), "text_editor": os.getenv("text_editor")}
