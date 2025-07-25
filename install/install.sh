@@ -7,7 +7,7 @@ env_name=noty
 echo "Create environment"
 
 # create and activate env
-conda env create -f install/env.yml
+conda env create -f install/environment.yml
 source activate $env_name
 
 
