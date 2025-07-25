@@ -4,7 +4,7 @@ import argparse
 import sys
 
 from noty.noty import Noty
-from noty.utils import check_args, get_env_var, parse_state
+from noty.utils import check_arguments_validity, get_dot_env, parse_state
 
 
 def run(arguments):
@@ -14,7 +14,7 @@ def run(arguments):
         parser (argparse.ArgumentParser): Argparse parser.
         arguments (argparse.Namespace): Argparse arguments.
     """
-    env = get_env_var()
+    env = get_dot_env()
     app = Noty(env["root_path"], env["text_editor"])
 
     # create and launch
@@ -54,5 +54,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    check_args(parser, args)
+    check_arguments_validity(parser, args)
     run(args)

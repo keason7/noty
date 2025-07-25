@@ -48,7 +48,7 @@ conda activate noty
 Add the aliases in ~/.bashrc file such as :
 
 ```bash
-alias <alias_name>="conda run -n noty python /path/to/cloned_repository/main.py <alias_value>"
+alias <alias_name>="conda run -n noty python /path/to/cloned_repository/run.py <alias_value>"
 ```
 
 Aliases can be found in install/alias.yml such as:

@@ -17,7 +17,7 @@ echo "Install aliases"
 # path aliases file
 path_root=$(pwd)
 path_alias=$path_root/install/alias.yml
-path_script=$path_root/main.py
+path_script=$path_root/run.py
 
 # get aliases as str(dict()) from yml file
 aliases=$(python -c "from noty.utils import read_yml; read_yml(\"$path_alias\", shell=True)" 2>&1)
