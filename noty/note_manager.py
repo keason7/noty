@@ -39,20 +39,20 @@ class NoteManager:
         self.json_io = MetadatasHandler(self.paths_inner)
         self.text_io = NoteHandler(self.paths_inner)
 
-    def __verify_subject(self, subject):
-        """Check that input subject is not in existing notes.
+    def __verify_title(self, title):
+        """Check that input title is not in existing notes.
 
         Args:
-            subject (str): Note subject.
+            title (str): Note title.
 
         Raises:
-            KeyError: Subject is not available.
+            KeyError: Title is not available.
         """
         with open(str(self.paths_inner["settings"]), "r", encoding="utf-8") as f:
             settings = json.load(f)
 
-        if subject in settings["subjects"]:
-            raise KeyError("Subject is not available.")
+        if title in settings["titles"]:
+            raise KeyError("Title is not available.")
 
     def __get_note(self, idx):
         """Get note and metadata paths from an existing note index.
@@ -78,24 +78,24 @@ class NoteManager:
 
         raise FileNotFoundError("Note does not exist.")
 
-    def create_note(self, subject):
+    def create_note(self, title):
         """Create a note.
 
         Args:
-            subject (str): Note subject.
+            title (str): Note title.
 
         Returns:
             int: Note idx.
         """
-        # check subject validity
-        self.__verify_subject(subject)
+        # check title validity
+        self.__verify_title(title)
 
         timestamp = get_timestamp()
-        filename = f"{timestamp}_{subject}"
+        filename = f"{timestamp}_{title}"
         self.text_io.create(filename)
-        self.json_io.create(filename, {"subject": subject})
+        self.json_io.create(filename, {"title": title})
 
-        idx = self.settings_io.incr({"subject": subject})
+        idx = self.settings_io.incr({"title": title})
         return idx
 
     def delete_note(self, idx):
@@ -109,8 +109,8 @@ class NoteManager:
         with open(str(paths_note["meta"]), "r", encoding="utf-8") as f:
             metadatas = json.load(f)
 
-        # remove subject from settings
-        self.settings_io.decr({"subject": metadatas["subject"]})
+        # remove title from settings
+        self.settings_io.decr({"title": metadatas["title"]})
 
         # remove note
         os.remove(paths_note["meta"])
@@ -123,7 +123,7 @@ class NoteManager:
         for item in files:
             with open(str(item), "r", encoding="utf-8") as f:
                 metadatas = json.load(f)
-            print(f"note id: {metadatas['id']}, subject: {metadatas['subject']}")
+            print(f"note id: {metadatas['id']}, title: {metadatas['title']}")
 
     def search_content(self, content, n_extra_line=1, max_res_per_file=1):
         """Search content within notes.
@@ -159,7 +159,7 @@ class NoteManager:
 
             # is there pattern
             if search_result != "":
-                print(f"note id: {metadatas['id']}, subject: {metadatas['subject']}")
+                print(f"note id: {metadatas['id']}, title: {metadatas['title']}")
                 print(f"{search_result}\n")
 
     def view_note(self, idx):

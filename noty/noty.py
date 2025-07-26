@@ -18,13 +18,13 @@ class Noty:
         """
         self.note_manager = NoteManager(path_root, text_editor)
 
-    def create(self, subject):
+    def create(self, title):
         """Create and view a note.
 
         Args:
-            subject (str): Subject of the note.
+            title (str): Title of the note.
         """
-        idx = self.note_manager.create_note(subject)
+        idx = self.note_manager.create_note(title)
         self.note_manager.view_note(idx)
 
     def delete(self, idx):

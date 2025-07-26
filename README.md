@@ -64,7 +64,7 @@ Aliases enable to launch commands from anywhere within a specific env
 ### Create a note and view it
 
 ```bash
-ncreate <subject>
+ncreate <title>
 ```
 
 ### Delete a note
