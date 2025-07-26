@@ -7,6 +7,49 @@ import yaml
 from dotenv import load_dotenv
 
 
+def check_arguments_validity(parser, args):
+    """Check how many arguments are set to not None at once.
+
+    Args:
+        parser (argparse.ArgumentParser): Argparse parser.
+        args (argparse.Namespace): Argparse arguments.
+
+    Raises:
+        ValueError: Maximum number of arguments=1.
+    """
+    # [(arg1, value1), (arg2, value2), ...]
+    args_list = list(vars(args).items())
+    # [value1, value2, ...]
+    args_values = [arg[1] for arg in args_list]
+
+    # all args are None, show help
+    if all(value is None for value in args_values):
+        parser.parse_args(["-h"])
+
+    # Check if user launch more than one command at once
+    n_args_not_none = sum(value is not None for value in args_values)
+
+    if n_args_not_none > 1:
+        raise ValueError(f"Maximum number of arguments=1, but found {n_args_not_none}")
+
+
+def get_dot_env():
+    """Read .env file.
+
+    Raises:
+        FileNotFoundError: Missing .env file.
+
+    Returns:
+        dict: File content.
+    """
+    dot_env = load_dotenv()
+
+    if not dot_env:
+        raise FileNotFoundError("Missing .env file.")
+
+    return {"path_root": os.getenv("path_root"), "text_editor": os.getenv("text_editor")}
+
+
 def read_yml(path, shell=False):
     """Read YAML file. If `shell=True`, the parsed content is printed to the console using
     `exit(content)` and the program exits immediately.
@@ -27,7 +70,7 @@ def read_yml(path, shell=False):
     return content
 
 
-def parse_state(arg):
+def parse_arg_state(arg):
     """Check argument type to know if its None or another type.
 
     Args:
@@ -39,31 +82,6 @@ def parse_state(arg):
     return arg is not None
 
 
-def check_args(parser, args):
-    """Check how many arguments are passed.
-
-    Args:
-        parser (argparse.ArgumentParser): Argparse parser.
-        args (argparse.Namespace): Argparse arguments.
-
-    Raises:
-        ValueError: Maximum number of arguments=1.
-    """
-    # get args value(s)
-    values = [arg[1] for arg in args._get_kwargs()]
-
-    # all args args are None, show help
-    if not any(values) and 0 not in values:
-        parser.parse_args(["-h"])
-
-    # all None except 1 arg -> 1
-    # all None              -> 0
-    n_args = len(list(set(values))) - 1
-
-    if n_args > 1:
-        raise ValueError(f"Maximum number of arguments=1, but found {n_args}")
-
-
 def get_timestamp():
     """Return current timestamp.
 
@@ -72,20 +90,3 @@ def get_timestamp():
     """
     now = datetime.datetime.now()
     return now.strftime("%Y_%m_%d-%H_%M_%S_%f")
-
-
-def get_env_var():
-    """Read .env file.
-
-    Raises:
-        FileNotFoundError: Missing .env file.
-
-    Returns:
-        dict: File content.
-    """
-    dotenv = load_dotenv()
-
-    if not dotenv:
-        raise FileNotFoundError("Missing .env file.")
-
-    return {"root_path": os.getenv("root_path"), "text_editor": os.getenv("text_editor")}
