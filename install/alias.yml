@@ -1,5 +1,5 @@
-nlaunch: --launch
 ncreate: --create
 ndelete: --delete
 nlist: --list
 nsearch: --search
+nview: --view

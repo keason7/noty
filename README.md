@@ -61,7 +61,7 @@ Aliases can be found in install/alias.yml such as:
 
 Aliases enable to launch commands from anywhere within a specific env
 
-### Create a note and launch it
+### Create a note and view it
 
 ```bash
 ncreate <subject>
@@ -73,10 +73,10 @@ ncreate <subject>
 ndelete <id>
 ```
 
-### Launch a note
+### View a note
 
 ```bash
-nlaunch <id>
+nview <id>
 ```
 
 ### List all notes

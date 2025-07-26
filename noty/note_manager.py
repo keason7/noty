@@ -39,7 +39,7 @@ class NoteManager:
         self.json_io = MetadatasHandler(self.paths_inner)
         self.text_io = NoteHandler(self.paths_inner)
 
-    def verify_subject(self, subject):
+    def __verify_subject(self, subject):
         """Check that input subject is not in existing notes.
 
         Args:
@@ -54,6 +54,30 @@ class NoteManager:
         if subject in settings["subjects"]:
             raise KeyError("Subject is not available.")
 
+    def __get_note(self, idx):
+        """Get note and metadata paths from an existing note index.
+
+        Args:
+            idx (int): Note index.
+
+        Raises:
+            FileNotFoundError: Note does not exist.
+
+        Returns:
+            dict: Note and metadata dictionary.
+        """
+        files = list(self.paths_inner["metadatas"].glob("**/*.json"))
+
+        for item in files:
+            with open(str(item), "r", encoding="utf-8") as f:
+                metadatas = json.load(f)
+
+            # note has been found
+            if metadatas["id"] == idx:
+                return {"note": metadatas["path_note"], "meta": str(item)}
+
+        raise FileNotFoundError("Note does not exist.")
+
     def create_note(self, subject):
         """Create a note.
 
@@ -64,7 +88,7 @@ class NoteManager:
             int: Note idx.
         """
         # check subject validity
-        self.verify_subject(subject)
+        self.__verify_subject(subject)
 
         timestamp = get_timestamp()
         filename = f"{timestamp}_{subject}"
@@ -73,6 +97,24 @@ class NoteManager:
 
         idx = self.settings_io.incr({"subject": subject})
         return idx
+
+    def delete_note(self, idx):
+        """Delete existing note.
+
+        Args:
+            idx (int): Note index.
+        """
+        paths_note = self.__get_note(idx)
+
+        with open(str(paths_note["meta"]), "r", encoding="utf-8") as f:
+            metadatas = json.load(f)
+
+        # remove subject from settings
+        self.settings_io.decr({"subject": metadatas["subject"]})
+
+        # remove note
+        os.remove(paths_note["meta"])
+        os.remove(paths_note["note"])
 
     def list_notes(self):
         """List existing notes."""
@@ -120,53 +162,11 @@ class NoteManager:
                 print(f"note id: {metadatas['id']}, subject: {metadatas['subject']}")
                 print(f"{search_result}\n")
 
-    def get_note(self, idx):
-        """Get note and metadata paths from an existing note index.
-
-        Args:
-            idx (int): Note index.
-
-        Raises:
-            FileNotFoundError: Note does not exist.
-
-        Returns:
-            dict: Note and metadata dictionary.
-        """
-        files = list(self.paths_inner["metadatas"].glob("**/*.json"))
-
-        for item in files:
-            with open(str(item), "r", encoding="utf-8") as f:
-                metadatas = json.load(f)
-
-            # note has been found
-            if metadatas["id"] == idx:
-                return {"note": metadatas["path_note"], "meta": str(item)}
-
-        raise FileNotFoundError("Note does not exist.")
-
-    def delete_note(self, idx):
-        """Delete existing note.
+    def view_note(self, idx):
+        """View existing note in prefered text editor.
 
         Args:
             idx (int): Note index.
         """
-        paths_note = self.get_note(idx)
-
-        with open(str(paths_note["meta"]), "r", encoding="utf-8") as f:
-            metadatas = json.load(f)
-
-        # remove subject from settings
-        self.settings_io.decr({"subject": metadatas["subject"]})
-
-        # remove note
-        os.remove(paths_note["meta"])
-        os.remove(paths_note["note"])
-
-    def launch_note(self, idx):
-        """Launch existing note in prefered text editor.
-
-        Args:
-            idx (int): Note index.
-        """
-        paths_note = self.get_note(idx)
+        paths_note = self.__get_note(idx)
         subprocess.run([self.text_editor, f"{paths_note['note']}"], check=False)
