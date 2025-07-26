@@ -14,13 +14,11 @@ class SettingsHandler:
             path_settings (str): Settings paths.
             ext (str, optional): File extention. Defaults to ".json".
         """
-        self.location = path_settings / f"settings{ext}"
+        self.path_settings = path_settings / f"settings{ext}"
 
-        if not self.location.exists():
-            metadatas = {"max_idx": -1, "subjects": []}
-
-            with open(str(self.location), "w", encoding="utf-8") as f:
-                json.dump(metadatas, f, indent=4)
+        if not self.path_settings.exists():
+            with open(str(self.path_settings), "w", encoding="utf-8") as f:
+                json.dump({"max_idx": -1, "subjects": []}, f)
 
     def incr(self, updt_dict):
         """Update settings during note creation.
@@ -31,16 +29,16 @@ class SettingsHandler:
         Returns:
             int: Max index.
         """
-        with open(str(self.location), "r", encoding="utf-8") as f:
-            metadatas = json.load(f)
+        with open(str(self.path_settings), "r", encoding="utf-8") as f:
+            settings = json.load(f)
 
-        metadatas["max_idx"] += 1
-        metadatas["subjects"].append(updt_dict["subject"])
+        settings["max_idx"] += 1
+        settings["subjects"].append(updt_dict["subject"])
 
-        with open(str(self.location), "w", encoding="utf-8") as f:
-            json.dump(metadatas, f, indent=4)
+        with open(str(self.path_settings), "w", encoding="utf-8") as f:
+            json.dump(settings, f)
 
-        return metadatas["max_idx"]
+        return settings["max_idx"]
 
     def decr(self, updt_dict):
         """Update settings during note deletion.
@@ -48,13 +46,13 @@ class SettingsHandler:
         Args:
             updt_dict (dict): Update dictionary.
         """
-        with open(str(self.location), "r", encoding="utf-8") as f:
-            metadatas = json.load(f)
+        with open(str(self.path_settings), "r", encoding="utf-8") as f:
+            settings = json.load(f)
 
-        metadatas["subjects"].remove(updt_dict["subject"])
+        settings["subjects"].remove(updt_dict["subject"])
 
-        with open(str(self.location), "w", encoding="utf-8") as f:
-            json.dump(metadatas, f, indent=4)
+        with open(str(self.path_settings), "w", encoding="utf-8") as f:
+            json.dump(settings, f)
 
 
 class AbstractHandler:
@@ -71,7 +69,7 @@ class AbstractHandler:
         self.ext = ext
 
     @abstractmethod
-    def create(self, file_name, optional_metas):
+    def create(self, file_name, optional_metas=None):
         """Create a file.
 
         Args:
@@ -84,47 +82,11 @@ class AbstractHandler:
         raise NotImplementedError("Method is not implemented in abstract class.")
 
 
-class JSONHandler(AbstractHandler):
-    """JSON I/O file handler."""
-
-    def __init__(self, paths_inner, ext=".json"):
-        """Initialize JSON handler object.
-
-        Args:
-            paths_inner (dict): Dictionary of data paths.
-            ext (str, optional): File extention.. Defaults to ".json".
-        """
-        super().__init__(paths_inner, ext)
-
-    def create(self, file_name, optional_metas):
-        """Create a JSON file.
-
-        Args:
-            file_name (str): Filename to create.
-            optional_metas (dict): Optional metadatas.
-        """
-        path_file = self.paths_inner["metadatas"] / str(file_name + self.ext)
-
-        with open(str(self.paths_inner["settings"]), "r", encoding="utf-8") as f:
-            meta = json.load(f)
-
-        # construct metadatas
-        metadatas = {
-            "id": meta["max_idx"] + 1,
-            "date": file_name,
-            "subject": optional_metas["subject"],
-            "path_note": str(self.paths_inner["notes"] / str(file_name + ".txt")),
-        }
-
-        with open(path_file, "w", encoding="utf-8") as f:
-            json.dump(metadatas, f, indent=4)
-
-
-class TXTHandler(AbstractHandler):
-    """TXT I/O file handler."""
+class NoteHandler(AbstractHandler):
+    """Note I/O file handler."""
 
     def __init__(self, paths_inner, ext=".txt"):
-        """Initialize TXT handler object.
+        """Initialize note handler object.
 
         Args:
             paths_inner (dict): Dictionary of data paths.
@@ -132,8 +94,8 @@ class TXTHandler(AbstractHandler):
         """
         super().__init__(paths_inner, ext)
 
-    def create(self, file_name, optional_metas):
-        """Create a TXT file.
+    def create(self, file_name, optional_metas=None):
+        """Create a note file.
 
         Args:
             file_name (str): Filename to create.
@@ -144,3 +106,39 @@ class TXTHandler(AbstractHandler):
         with open(path_file, "w", encoding="utf-8") as f:
             f.write("")
         f.close()
+
+
+class MetadatasHandler(AbstractHandler):
+    """Metadatas I/O file handler."""
+
+    def __init__(self, paths_inner, ext=".json"):
+        """Initialize metadatas handler object.
+
+        Args:
+            paths_inner (dict): Dictionary of data paths.
+            ext (str, optional): File extention.. Defaults to ".json".
+        """
+        super().__init__(paths_inner, ext)
+
+    def create(self, file_name, optional_metas=None):
+        """Create a metadatas file.
+
+        Args:
+            file_name (str): Filename to create.
+            optional_metas (dict): Optional metadatas.
+        """
+        path_file = self.paths_inner["metadatas"] / str(file_name + self.ext)
+
+        with open(str(self.paths_inner["settings"]), "r", encoding="utf-8") as f:
+            settings = json.load(f)
+
+        # construct metadatas
+        metadatas = {
+            "id": settings["max_idx"] + 1,
+            "date": file_name,
+            "subject": optional_metas["subject"],
+            "path_note": str(self.paths_inner["notes"] / str(file_name + ".txt")),
+        }
+
+        with open(path_file, "w", encoding="utf-8") as f:
+            json.dump(metadatas, f)

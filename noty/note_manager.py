@@ -5,7 +5,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from noty.io import JSONHandler, SettingsHandler, TXTHandler
+from noty.io import MetadatasHandler, SettingsHandler, NoteHandler
 from noty.utils import get_timestamp
 
 
@@ -26,19 +26,18 @@ class NoteManager:
         self.paths_inner = {
             "metadatas": self.path_install / "metadatas",
             "notes": self.path_install / "notes",
-            "utils": self.path_install / "utils",
+            "settings": self.path_install / "settings",
         }
 
         for _, value in self.paths_inner.items():
             if not value.exists():
                 Path(value).mkdir(mode=0o777, parents=False, exist_ok=True)
 
-        self.settings_io = SettingsHandler(self.paths_inner["utils"])
+        self.settings_io = SettingsHandler(self.paths_inner["settings"])
+        self.paths_inner["settings"] = self.settings_io.path_settings
 
-        self.paths_inner["settings"] = self.settings_io.location
-
-        self.json_io = JSONHandler(self.paths_inner)
-        self.text_io = TXTHandler(self.paths_inner)
+        self.json_io = MetadatasHandler(self.paths_inner)
+        self.text_io = NoteHandler(self.paths_inner)
 
     def verify_subject(self, subject):
         """Check that input subject is not in existing notes.
@@ -49,10 +48,10 @@ class NoteManager:
         Raises:
             KeyError: Subject is not available.
         """
-        with open(str(self.settings_io.location), "r", encoding="utf-8") as f:
-            metadatas = json.load(f)
+        with open(str(self.paths_inner["settings"]), "r", encoding="utf-8") as f:
+            settings = json.load(f)
 
-        if subject in metadatas["subjects"]:
+        if subject in settings["subjects"]:
             raise KeyError("Subject is not available.")
 
     def create_note(self, subject):
@@ -64,13 +63,13 @@ class NoteManager:
         Returns:
             int: Note idx.
         """
-
         # check subject validity
         self.verify_subject(subject)
 
         timestamp = get_timestamp()
-        self.text_io.create(timestamp, None)
-        self.json_io.create(timestamp, {"subject": subject})
+        filename = f"{timestamp}_{subject}"
+        self.text_io.create(filename)
+        self.json_io.create(filename, {"subject": subject})
 
         idx = self.settings_io.incr({"subject": subject})
         return idx
@@ -135,7 +134,7 @@ class NoteManager:
         """
         files = list(self.paths_inner["metadatas"].glob("**/*.json"))
 
-        for _, item in enumerate(files):
+        for item in files:
             with open(str(item), "r", encoding="utf-8") as f:
                 metadatas = json.load(f)
 
@@ -154,10 +153,10 @@ class NoteManager:
         paths_note = self.get_note(idx)
 
         with open(str(paths_note["meta"]), "r", encoding="utf-8") as f:
-            note_metas = json.load(f)
+            metadatas = json.load(f)
 
         # remove subject from settings
-        self.settings_io.decr({"subject": note_metas["subject"]})
+        self.settings_io.decr({"subject": metadatas["subject"]})
 
         # remove note
         os.remove(paths_note["meta"])
