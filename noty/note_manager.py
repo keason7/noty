@@ -5,7 +5,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from noty.io import MetadatasHandler, SettingsHandler, NoteHandler
+from noty.io import MetadatasHandler, NoteHandler, SettingsHandler
 from noty.utils import get_timestamp
 
 
