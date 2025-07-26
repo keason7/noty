@@ -70,7 +70,7 @@ def read_yml(path, shell=False):
     return content
 
 
-def parse_state(arg):
+def parse_arg_state(arg):
     """Check argument type to know if its None or another type.
 
     Args:

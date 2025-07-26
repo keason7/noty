@@ -1,10 +1,9 @@
 """Noty entry script."""
 
 import argparse
-import sys
 
 from noty.noty import Noty
-from noty.utils import check_arguments_validity, get_dot_env, parse_state
+from noty.utils import check_arguments_validity, get_dot_env
 
 
 def run(arguments):
@@ -15,32 +14,9 @@ def run(arguments):
         arguments (argparse.Namespace): Argparse arguments.
     """
     dot_env = get_dot_env()
+
     app = Noty(dot_env["path_root"], dot_env["text_editor"])
-
-    # create and launch
-    if parse_state(arguments.create):
-        app.create(arguments.create)
-        sys.exit()
-
-    # delete
-    if parse_state(arguments.delete):
-        app.delete(arguments.delete)
-        sys.exit()
-
-    # launch
-    if parse_state(arguments.launch):
-        app.launch(arguments.launch)
-        sys.exit()
-
-    # list
-    if parse_state(arguments.list):
-        app.list()
-        sys.exit()
-
-    # search
-    if parse_state(arguments.search):
-        app.search(arguments.search)
-        sys.exit()
+    app.run(arguments)
 
 
 if __name__ == "__main__":
