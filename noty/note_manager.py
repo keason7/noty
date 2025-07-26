@@ -19,7 +19,7 @@ class NoteManager:
             path_root (str): Installation path.
             text_editor (str): Prefered text editor.
         """
-        self.path_install = Path(path_root) / ".noty"
+        self.path_install = (Path(path_root) / ".noty").expanduser().resolve()
         self.path_install.mkdir(mode=0o777, parents=False, exist_ok=True)
         self.text_editor = text_editor
 
