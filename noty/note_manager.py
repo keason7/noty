@@ -125,13 +125,11 @@ class NoteManager:
                 metadatas = json.load(f)
             print(f"note id: {metadatas['id']}, title: {metadatas['title']}")
 
-    def search_content(self, content, n_extra_line=1, max_res_per_file=1):
+    def search_content(self, content):
         """Search content within notes.
 
         Args:
             content (str): Content to search.
-            n_extra_line (int, optional): Number of lines before pattern. Defaults to 1.
-            max_res_per_file (int, optional): Max occurence per file. Defaults to 1.
         """
         files = list(self.paths_inner["metadatas"].glob("**/*.json"))
 
@@ -146,9 +144,6 @@ class NoteManager:
             # --color : display patter as colored
             grep = [
                 "grep",
-                f"-A {n_extra_line}",
-                f"-B {n_extra_line}",
-                f"-m {max_res_per_file}",
                 "-n",
                 "--color=always",
                 content,
