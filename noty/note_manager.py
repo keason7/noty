@@ -137,9 +137,6 @@ class NoteManager:
             with open(str(item), "r", encoding="utf-8") as f:
                 metadatas = json.load(f)
 
-            # -A : display n lines before pattern
-            # -B : display n lines after pattern
-            # -m : max occurence per file
             # -n : show file line number
             # --color : display patter as colored
             grep = [
@@ -155,7 +152,7 @@ class NoteManager:
             # is there pattern
             if search_result != "":
                 print(f"note id: {metadatas['id']}, title: {metadatas['title']}")
-                print(f"{search_result}\n")
+                print(f"{search_result.rstrip()}")
 
     def view_note(self, idx):
         """View existing note in prefered text editor.
