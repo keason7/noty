@@ -24,9 +24,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--create", type=str, default=None, help="Create a note.")
     parser.add_argument("--delete", type=int, default=None, help="Delete a note.")
-    parser.add_argument("--launch", type=int, default=None, help="Launch a note.")
     parser.add_argument("--list", default=None, action="store_true", help="List notes.")
     parser.add_argument("--search", type=str, default=None, help="Search a note content.")
+    parser.add_argument("--view", type=int, default=None, help="View a note.")
 
     args = parser.parse_args()
 

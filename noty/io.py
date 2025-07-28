@@ -18,7 +18,7 @@ class SettingsHandler:
 
         if not self.path_settings.exists():
             with open(str(self.path_settings), "w", encoding="utf-8") as f:
-                json.dump({"max_idx": -1, "subjects": []}, f)
+                json.dump({"max_idx": -1, "titles": []}, f)
 
     def incr(self, updt_dict):
         """Update settings during note creation.
@@ -33,7 +33,7 @@ class SettingsHandler:
             settings = json.load(f)
 
         settings["max_idx"] += 1
-        settings["subjects"].append(updt_dict["subject"])
+        settings["titles"].append(updt_dict["title"])
 
         with open(str(self.path_settings), "w", encoding="utf-8") as f:
             json.dump(settings, f)
@@ -49,7 +49,7 @@ class SettingsHandler:
         with open(str(self.path_settings), "r", encoding="utf-8") as f:
             settings = json.load(f)
 
-        settings["subjects"].remove(updt_dict["subject"])
+        settings["titles"].remove(updt_dict["title"])
 
         with open(str(self.path_settings), "w", encoding="utf-8") as f:
             json.dump(settings, f)
@@ -136,7 +136,7 @@ class MetadatasHandler(AbstractHandler):
         metadatas = {
             "id": settings["max_idx"] + 1,
             "date": file_name,
-            "subject": optional_metas["subject"],
+            "title": optional_metas["title"],
             "path_note": str(self.paths_inner["notes"] / str(file_name + ".txt")),
         }
 
